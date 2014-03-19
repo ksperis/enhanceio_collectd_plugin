@@ -24,11 +24,15 @@ def enhanceio_read(data=None):
         with open(procfile, 'r') as fd:
             d = dict(line.strip().split(None, 1) for line in fd)
             for key in d:
-                values.dispatch(plugin_instance=cache, type='gauge', type_instance=key, values=[d[key]])
+		if key in ['read_hit_pct','write_hit_pct','dirty_write_hit_pct']:
+                    values.dispatch(plugin_instance=cache, type='percent', type_instance=key, values=[d[key]])
+	        elif key in ['nr_blocks', 'nr_dirty', 'nr_sets']:
+                    values.dispatch(plugin_instance=cache, type='gauge', type_instance=key, values=[d[key]])
+                else:
+                    values.dispatch(plugin_instance=cache, type='derive', type_instance=key, values=[d[key]])
    
             values.dispatch(plugin_instance=cache, type='disk_ops', type_instance='enhanceio_ssd_rw', values=[d['ssd_reads'], d['ssd_writes']])
-            values.dispatch(plugin_instance=cache, type='derive', type_instance='uncached_reads', values=[d['uncached_reads']])
-            values.dispatch(plugin_instance=cache, type='derive', type_instance='uncached_writes', values=[d['uncached_writes']])
+            values.dispatch(plugin_instance=cache, type='df', type_instance='df_cache', values=[d['cached_blocks'],str(int(d['nr_blocks'])-int(d['cached_blocks']))])
 
         fd.close()
 
