@@ -1,4 +1,4 @@
-enhanceio_collectd_plugin
+enhanceio collectd plugin
 =========================
 
 Install
